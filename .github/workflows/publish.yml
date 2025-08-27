@@ -1,0 +1,43 @@
+name: Publish to PyPI (placeholder)
+
+on:
+  push:
+    tags:
+      - "v*"
+      - "pypi-*"
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Use deploy pyproject for placeholder
+        run: |
+          cp pyproject-deploy.toml pyproject.toml
+          echo "Using deploy pyproject for lightweight placeholder"
+
+      - name: Install build tooling
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build
+
+      - name: Build sdist and wheel
+        run: |
+          python -m build
+          ls -la dist
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip-existing: true
+          verbose: true
+

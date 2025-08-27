@@ -1,0 +1,28 @@
+[project]
+name = "innit"
+version = "0.1.0"
+description = "Fast English vs non-English text detection"
+requires-python = ">=3.9"
+dependencies = [
+    "torch>=2.0.0",
+    "datasets>=2.0.0",
+    "onnx>=1.15.0",
+    "onnxruntime>=1.18.0",
+    "optimum>=1.0.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "fasttext-wheel"
+]
+
+[project.scripts]
+innit = "innit.cli:main"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["innit*"]
