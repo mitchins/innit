@@ -10,8 +10,9 @@ import time
 from pathlib import Path
 
 import numpy as np
-from .assets import load_safetensors_numpy
 from tinygrad import Tensor
+
+from .assets import load_safetensors_numpy
 
 # Model configuration (prefer cache in ~/.innit)
 MODEL_PATH = Path.home() / ".innit" / "model.safetensors"

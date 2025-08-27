@@ -199,6 +199,7 @@ class InnitDetector:
         """Load tinygrad model."""
         try:
             from tinygrad import Tensor
+
             from .assets import load_safetensors_numpy
         except ImportError as err:
             raise ImportError(
