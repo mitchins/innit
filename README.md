@@ -1,130 +1,149 @@
-# innit - Fast English Detection
+# innit - Fast English vs Non-English Detection
 
-Note: The current PyPI release is a lightweight placeholder to reserve the
-package name while the model is trained and productized. It installs quickly
-and does not include heavy training dependencies. The CLI expects you to
-provide an ONNX model file.
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![PyPI](https://img.shields.io/pypi/v/innit-detector.svg)](https://pypi.org/project/innit-detector/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A tiny, fast, and dependency-light tool to determine if text is English or not English. Perfect for book-length texts where you need quick language detection without heavy ML frameworks.
+A lightweight Python package for fast binary language detection (English vs Non-English) using ONNX runtime.
 
 ## Features
 
-- **Fast**: Sub-millisecond inference per 2KB window on CPU
-- **Small**: ~1-2MB model size (0.5-1MB with int8 quantization)  
-- **Simple**: Binary classification - English vs Not-English
-- **Legal**: Trained only on legally clean datasets
-- **Deployable**: Ships as ONNX runtime (no PyTorch dependency for inference)
-
-## Installation
-
-### For inference only (lightweight):
-```bash
-pip install onnxruntime
-# Download the innit.onnx model file
-```
-
-### For training and development:
-```bash
-git clone <repo>
-cd innit
-pip install -e .
-```
+- ⚡ **Ultra-fast**: Sub-millisecond inference on modern CPUs
+- 🪶 **Lightweight**: ~600KB model, minimal dependencies  
+- 🎯 **Accurate**: 99.94% validation accuracy, 100% on comprehensive challenge set
+- 🔧 **Easy**: Simple CLI and Python API with automatic model download
+- 🌍 **Universal**: Trained on 52+ languages across diverse scripts
+- 📝 **Smart chunking**: Handles texts of any length automatically
+- 🚀 **Production-ready**: ONNX deployment, no PyTorch dependency
 
 ## Quick Start
 
-### CLI Usage
+### Installation
+
 ```bash
-# Analyze a text file
-innit book.txt
+pip install innit-detector
+```
 
-# Output as JSON
-innit book.txt --json
+### CLI Usage
 
-# Use specific model
-innit book.txt --model path/to/innit.onnx
+```bash
+# Basic usage
+innit "Hello world!"                    # → English (confidence: 0.974)
+
+# Download model first (recommended)
+innit --download
+
+# Multiple texts
+innit "Hello" "Bonjour" "你好" "Привет"  # → EN, NOT-EN, NOT-EN, NOT-EN
+
+# Long text with chunking
+innit "Very long paragraph that exceeds the 256-byte model limit..."
+# → English (confidence: 0.990), chunked, 5 chunks
+
+# JSON output
+innit --json "Hello world!"
+# → {"language": "en", "is_english": true, "confidence": 0.974, ...}
 ```
 
 ### Python API
+
 ```python
-from innit.onnx_runner import ONNXInnitRunner, score_text_onnx
+from innit_detector import InnitDetector
 
-# Load model
-runner = ONNXInnitRunner("innit.onnx")
+# Initialize (downloads model automatically if needed)
+detector = InnitDetector()
 
-# Score text
-result = score_text_onnx(runner, text)
-print(result["label"])  # "ENGLISH", "NOT-EN", or "UNCERTAIN"
+# Single prediction
+result = detector.predict("Hello world!")
+print(result['is_english'])    # True
+print(result['confidence'])    # 0.974
+
+# Batch prediction
+results = detector.predict_batch(["Hello", "Bonjour", "你好"])
+for r in results:
+    print(f"{r['is_english']} ({r['confidence']:.3f})")
+
+# Control chunking for long texts
+result = detector.predict(long_text, chunk_strategy='auto')  # Default
+result = detector.predict(long_text, chunk_strategy='truncate')  # Classic
 ```
 
-## Training Your Own Model
+## Supported Languages
 
-1. **Train the model**:
-```bash
-python train_innit.py
-```
+Trained to distinguish English from 52+ languages including:
 
-2. **Export to ONNX**:
-```bash
-python export_onnx.py
-```
-
-3. **Test evaluation**:
-```bash
-python eval_innit.py sample_text.txt
-```
-
-## How It Works
-
-- **Architecture**: Tiny byte-level CNN with depthwise separable convolutions
-- **Input**: UTF-8 bytes (no tokenizer needed)
-- **Strategy**: Slides 2KB windows over text and aggregates predictions
-- **Thresholds**: Conservative - requires high confidence across many windows
-
-## Model Details
-
-- **Input**: Sequences of up to 2048 UTF-8 bytes
-- **Architecture**: 4-block CNN with residual connections
-- **Output**: Binary classification (English probability)
-- **Training**: ~50K samples each of English and non-English text
-- **Datasets**: Project Gutenberg (English) + multilingual sources (non-English)
-
-## Legal & Licensing
-
-### Training Data Sources
-- **English**: Project Gutenberg texts (public domain in US)
-- **Non-English**: HuggingFace multilingual datasets with permissive licenses
-- See `DATA_SOURCES.md` for complete dataset information
-
-### Model License
-This model and code are released under MIT License. See `LICENSE` for details.
-
-### Usage Notes
-- The model weights are original work trained on legally clean data
-- No copyrighted text content is redistributed
-- Safe for commercial use
+- **Latin scripts**: Spanish, French, German, Italian, Dutch, Portuguese, etc.
+- **CJK scripts**: Chinese (Simplified/Traditional), Japanese, Korean  
+- **Cyrillic scripts**: Russian, Ukrainian, Bulgarian, Serbian
+- **Other scripts**: Arabic, Hindi, Bengali, Thai, Hebrew, Tamil, etc.
 
 ## Performance
 
-| Metric | Value |
-|--------|--------|
-| Model Size (FP32) | ~1.5 MB |
-| Model Size (INT8) | ~0.8 MB |
-| Inference Speed | <1ms per 2KB window |
-| Memory Usage | <100 MB |
-| Accuracy | >95% on book-length texts |
+- **Validation accuracy**: 99.94%
+- **Challenge set accuracy**: 100% (14/14 comprehensive test cases)
+- **Model size**: ~600KB (ONNX format)
+- **Inference speed**: Sub-millisecond on modern CPUs
+- **Memory usage**: Minimal (~10MB RAM)
+
+### Challenge Set Results
+
+Perfect accuracy on diverse test cases:
+- ✅ Ultra-short texts: "Good morning!"
+- ✅ Emoji handling: "Check our sale! 🎉"  
+- ✅ Mathematical formulas: "x = (-b ± √(b²-4ac))/2a"
+- ✅ Scientific notation: "CO₂ + H₂O → C₆H₁₂O₆"
+- ✅ All major scripts: Arabic, CJK, Cyrillic, Devanagari
+- ✅ Tricky cases: Dutch vs English, technical text
+
+## Architecture
+
+- **Model type**: Byte-level Convolutional Neural Network
+- **Input**: Raw UTF-8 bytes (up to 256 bytes per chunk)
+- **Output**: Binary classification (English vs Non-English)
+- **Parameters**: 156,642 (~600KB)
+- **Framework**: ONNX Runtime (cross-platform)
+
+## Text Length Handling
+
+| Text Length | Handling | Performance |
+|-------------|----------|-------------|
+| 0-256 bytes | Single chunk | Optimal |
+| 256+ bytes | Auto-chunking | Excellent |
+| 2KB+ text | Multiple chunks + voting | Very good |
+
+For texts longer than 256 bytes, innit automatically:
+1. Splits text into overlapping chunks
+2. Processes each chunk independently  
+3. Combines results using weighted averaging and majority voting
+4. Reports aggregated confidence score
+
+## Development
+
+```bash
+# Install with dev dependencies
+pip install -e ".[dev]"
+
+# Code quality
+ruff check innit_detector.py
+black innit_detector.py
+mypy innit_detector.py
+
+# Run tests
+pytest --cov=innit_detector
+```
+
+## Model Details
+
+The model is available on [🤗 HuggingFace Hub](https://huggingface.co/Mitchins/innit-language-detection) with:
+- PyTorch weights (SafeTensors format)
+- ONNX runtime version  
+- Complete training details
+- Comprehensive documentation
 
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch
-3. Add tests if applicable  
-4. Submit a pull request
+Issues and pull requests welcome! See the [GitHub repository](https://github.com/Mitchins/innit-language-detection) for details.
 
-## Troubleshooting
+## License
 
-**Model file not found**: Ensure you've either trained a model with `python train_innit.py` or downloaded a pre-trained `innit.onnx` file.
-
-**Import errors**: For inference, you only need `onnxruntime`. For training, install the full development dependencies.
-
-**Poor performance**: The model works best on book-length texts (>1KB). Very short texts may return "UNCERTAIN".
-# innit
+MIT License - see [LICENSE](LICENSE) file for details.

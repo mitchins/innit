@@ -1,28 +1,116 @@
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "innit"
-version = "0.1.0"
-description = "Fast English vs non-English text detection"
-requires-python = ">=3.9"
+name = "innit-detector"
+version = "1.0.0"
+description = "Fast English vs Non-English text detection using ONNX"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Mitchell Currie", email = "mitchell@example.com"},
+]
+keywords = [
+    "language-detection", 
+    "english", 
+    "nlp", 
+    "machine-learning", 
+    "onnx", 
+    "text-classification",
+    "byte-level",
+    "multilingual"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11", 
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Linguistic",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
 dependencies = [
-    "torch>=2.0.0",
-    "datasets>=2.0.0",
-    "onnx>=1.15.0",
-    "onnxruntime>=1.18.0",
-    "optimum>=1.0.0"
+    "onnxruntime>=1.15.0",
+    "numpy>=1.21.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "fasttext-wheel"
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "flake8-bugbear>=23.0.0", 
+    "vulture>=2.7",
+    "mypy>=1.5.0",
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0",
 ]
 
+[project.urls]
+"Homepage" = "https://github.com/Mitchins/innit-language-detection"
+"Model" = "https://huggingface.co/Mitchins/innit-language-detection"
+"Bug Reports" = "https://github.com/Mitchins/innit-language-detection/issues"
+"Repository" = "https://github.com/Mitchins/innit-language-detection"
+
 [project.scripts]
-innit = "innit.cli:main"
+innit = "innit_detector:main"
 
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
+[tool.setuptools]
+py-modules = ["innit_detector"]
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["innit*"]
+[tool.black]
+line-length = 100
+target-version = ['py310']
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by black)
+]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --cov=innit_detector"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["innit_detector"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+]

@@ -1,3 +1,0 @@
-The quick brown fox jumps over the lazy dog. This is clearly English text written in a standard way. We can see that the grammar, vocabulary, and sentence structure are typical of the English language. Machine learning models should be able to easily identify this as English content based on common patterns and word usage.
-
-In addition to the basic sentence structure, this text contains various English linguistic features including articles (the, a), prepositions (over), and common English words that appear frequently in English literature and writing. The overall flow and style is characteristic of modern English prose.

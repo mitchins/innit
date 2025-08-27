@@ -1,3 +1,0 @@
-Bonjour et bienvenue dans ce texte français. Cette phrase est écrite en français et utilise la grammaire et le vocabulaire typiques de cette belle langue. Les modèles d'apprentissage automatique devraient pouvoir identifier facilement ce contenu comme étant du français basé sur les modèles linguistiques et l'utilisation des mots.
-
-En plus de la structure de base des phrases, ce texte contient diverses caractéristiques linguistiques françaises, notamment les articles (le, la, les, un, une), les prépositions (dans, de, sur), et les mots français courants qui apparaissent fréquemment dans la littérature et l'écriture françaises. Le flux général et le style sont caractéristiques de la prose française moderne.

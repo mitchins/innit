@@ -1,0 +1,214 @@
+{
+  "metadata": {
+    "total_samples": 14,
+    "english_samples": 6,
+    "non_english_samples": 8,
+    "scripts": [
+      "Cyrillic",
+      "Devanagari",
+      "Latin",
+      "Mixed",
+      "CJK",
+      "Arabic"
+    ],
+    "categories": [
+      "cjk_japanese",
+      "cyrillic",
+      "english_like_dutch",
+      "medium_english_contractions",
+      "arabic_script",
+      "short_english_mixed",
+      "ultra_short_english",
+      "english_with_emoji",
+      "cjk_korean",
+      "devanagari_hindi",
+      "cjk_chinese",
+      "ultra_short_latin",
+      "mathematical_english",
+      "scientific_english"
+    ],
+    "difficulty_levels": [
+      "hard",
+      "medium",
+      "easy"
+    ],
+    "length_distribution": {
+      "ultra_short": 5,
+      "short": 6,
+      "medium": 3
+    },
+    "version": "1.1",
+    "created_for": "innit English detection model",
+    "note": "Completely synthetic test data - NOT in training set"
+  },
+  "test_cases": [
+    {
+      "id": 1,
+      "text": "Good morning!",
+      "expected_label": 1,
+      "expected_class": "EN",
+      "category": "ultra_short_english",
+      "length": 13,
+      "description": "Ultra-short English greeting",
+      "script": "Latin",
+      "difficulty": "easy",
+      "actual_length": 13
+    },
+    {
+      "id": 2,
+      "text": "Ciao bella!",
+      "expected_label": 0,
+      "expected_class": "NOT-EN",
+      "category": "ultra_short_latin",
+      "length": 11,
+      "description": "Ultra-short Italian greeting",
+      "script": "Latin",
+      "difficulty": "easy",
+      "actual_length": 11
+    },
+    {
+      "id": 3,
+      "text": "Call me at 555-1234, okay?",
+      "expected_label": 1,
+      "expected_class": "EN",
+      "category": "short_english_mixed",
+      "length": 26,
+      "description": "Short English with numbers and punctuation",
+      "script": "Latin",
+      "difficulty": "medium",
+      "actual_length": 26
+    },
+    {
+      "id": 4,
+      "text": "Добро пожаловать в наш магазин",
+      "expected_label": 0,
+      "expected_class": "NOT-EN",
+      "category": "cyrillic",
+      "length": 30,
+      "description": "Russian welcome message",
+      "script": "Cyrillic",
+      "difficulty": "easy",
+      "actual_length": 30
+    },
+    {
+      "id": 5,
+      "text": "今天天气很好，我们去公园吧",
+      "expected_label": 0,
+      "expected_class": "NOT-EN",
+      "category": "cjk_chinese",
+      "length": 13,
+      "description": "Chinese about weather and park",
+      "script": "CJK",
+      "difficulty": "easy",
+      "actual_length": 13
+    },
+    {
+      "id": 6,
+      "text": "このレストランの料理はとても美味しいです",
+      "expected_label": 0,
+      "expected_class": "NOT-EN",
+      "category": "cjk_japanese",
+      "length": 20,
+      "description": "Japanese about restaurant food",
+      "script": "CJK",
+      "difficulty": "easy",
+      "actual_length": 20
+    },
+    {
+      "id": 7,
+      "text": "안녕하세요! 오늘 날씨가 정말 좋네요",
+      "expected_label": 0,
+      "expected_class": "NOT-EN",
+      "category": "cjk_korean",
+      "length": 20,
+      "description": "Korean greeting about weather",
+      "script": "CJK",
+      "difficulty": "easy",
+      "actual_length": 20
+    },
+    {
+      "id": 8,
+      "text": "مرحبا بكم في مطعمنا الجديد",
+      "expected_label": 0,
+      "expected_class": "NOT-EN",
+      "category": "arabic_script",
+      "length": 26,
+      "description": "Arabic welcome to restaurant",
+      "script": "Arabic",
+      "difficulty": "medium",
+      "actual_length": 26
+    },
+    {
+      "id": 9,
+      "text": "आपका स्वागत है हमारे नए स्टोर में",
+      "expected_label": 0,
+      "expected_class": "NOT-EN",
+      "category": "devanagari_hindi",
+      "length": 33,
+      "description": "Hindi welcome to store",
+      "script": "Devanagari",
+      "difficulty": "medium",
+      "actual_length": 33
+    },
+    {
+      "id": 10,
+      "text": "Welkom bij onze nieuwe winkel vandaag",
+      "expected_label": 0,
+      "expected_class": "NOT-EN",
+      "category": "english_like_dutch",
+      "length": 37,
+      "description": "Dutch that looks English-like",
+      "script": "Latin",
+      "difficulty": "hard",
+      "actual_length": 37
+    },
+    {
+      "id": 11,
+      "text": "I can't believe we're finally here! It's been such a long journey.",
+      "expected_label": 1,
+      "expected_class": "EN",
+      "category": "medium_english_contractions",
+      "length": 66,
+      "description": "English with contractions and exclamation",
+      "script": "Latin",
+      "difficulty": "medium",
+      "actual_length": 66
+    },
+    {
+      "id": 12,
+      "text": "Check out our sale: 50% off today! 🎉",
+      "expected_label": 1,
+      "expected_class": "EN",
+      "category": "english_with_emoji",
+      "length": 36,
+      "description": "English with emoji and symbols",
+      "script": "Mixed",
+      "difficulty": "medium",
+      "actual_length": 36
+    },
+    {
+      "id": 13,
+      "text": "The quadratic formula x = (-b ± √(b²-4ac))/2a solves equations of the form ax² + bx + c = 0 by substituting coefficients.",
+      "expected_label": 1,
+      "expected_class": "EN",
+      "category": "mathematical_english",
+      "length": 121,
+      "description": "English mathematical explanation with formula",
+      "script": "Latin",
+      "difficulty": "medium",
+      "actual_length": 121
+    },
+    {
+      "id": 14,
+      "text": "Photosynthesis converts CO₂ and H₂O into glucose (C₆H₁₂O₆) using chlorophyll and sunlight, releasing oxygen as a byproduct.",
+      "expected_label": 1,
+      "expected_class": "EN",
+      "category": "scientific_english",
+      "length": 123,
+      "description": "English scientific explanation with chemical formulas",
+      "script": "Latin",
+      "difficulty": "medium",
+      "actual_length": 123
+    }
+  ]
+}
