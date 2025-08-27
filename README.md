@@ -1,20 +1,18 @@
-# innit - Fast English vs Non-English Detection
+# innit — Fast English vs Non‑English Detection
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![PyPI](https://img.shields.io/pypi/v/innit-detector.svg)](https://pypi.org/project/innit-detector/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A lightweight Python package for fast binary language detection (English vs Non-English) with two backends: ultra-fast ONNX Runtime or tiny, hackable TinyGrad.
+A lightweight Python package for fast binary language detection (English vs Non‑English) with two backends: fast ONNX Runtime or minimal TinyGrad.
 
 ## Features
 
-- ⚡ **Ultra-fast**: Sub-millisecond (ONNX CPU); TinyGrad for minimal deps
-- 🪶 **Lightweight**: ~600KB model  
-- 🎯 **Accurate**: 99.94% validation accuracy, 100% on comprehensive challenge set
-- 🔧 **Easy**: Simple CLI and Python API with automatic model download
-- 🌍 **Universal**: Trained on 52+ languages across diverse scripts
-- 📝 **Smart chunking**: Handles texts of any length automatically
-- 🚀 **Flexible**: Choose ONNX (speed) or TinyGrad (minimal deps)
+- Fast: sub‑millisecond with ONNX CPU on short texts
+- Small: ~600 KB model
+- Accurate: 99.94% validation accuracy (challenge set: 100%)
+- Simple: CLI and Python API; automatic model download and caching
+- Flexible: ONNX for speed, TinyGrad for minimal dependencies
 
 ## Quick Start
 
@@ -22,27 +20,25 @@ A lightweight Python package for fast binary language detection (English vs Non-
 
 - Default (TinyGrad backend included): `pip install innit-detector`
 - Fastest CPU backend (ONNX): `pip install innit-detector[onnx]`
-- Dev (ONNX + tools): `pip install innit-detector[onnx,dev]`
+- Development (with tools): `pip install innit-detector[onnx,dev]`
 
-### CLI Usage
+### CLI
 
 ```bash
-# Basic usage
-innit "Hello world!"                    # → English (confidence: 0.974)
+# Basic classification
+innit "Hello world!"
 
-# Download model first (recommended)
+# Download and cache model assets to ~/.innit
 innit --download
 
 # Multiple texts
-innit "Hello" "Bonjour" "你好" "Привет"  # → EN, NOT-EN, NOT-EN, NOT-EN
+innit "Hello" "Bonjour" "你好" "Привет"
 
-# Long text
+# Long text (sample first/last 10%)
 innit --chunk-strategy ends --ends-pct 0.1 "Very long paragraph ..."
-# → Samples the first/last 10% for a quick decision
 
 # JSON output
 innit --json "Hello world!"
-# → {"language": "en", "is_english": true, "confidence": 0.974, ...}
 ```
 
 Models
@@ -50,12 +46,12 @@ Models
 - If missing, run: `innit --download` (downloads ONNX + TinyGrad assets).
 - Choose assets: `innit --download --download-backend onnx|tinygrad|both`.
 
-### Python API (quick)
+### Python API
 
 ```python
-from innit_client import InnitClient, InnitClientConfig
+from innit import InnitClient, InnitClientConfig
 
-# Initialize (auto-detects installed backend; base install ships TinyGrad)
+# Initialize (auto-detects installed backend)
 client = InnitClient()
 # Prefer ONNX explicitly:
 # client = InnitClient(InnitClientConfig(backend='onnx'))
@@ -70,9 +66,9 @@ results = client.classify_snippets(["Hello", "Bonjour", "你好"])
 for r in results:
     print(f"{r['is_english']} ({r['confidence']:.3f})")
 
-# Document classification with hidden heuristics
-result = client.classify_document(long_text)           # auto: picks 'ends' for long docs
-result = client.classify_document(long_text, strategy='chunk')  # force chunking
+# Document classification with heuristics
+result = client.classify_document(long_text)                     # auto: may use 'ends' for long docs
+result = client.classify_document(long_text, strategy='chunk')   # force chunking
 result = client.classify_document(long_text, strategy='ends', ends_pct=0.1)
 ```
 
@@ -87,29 +83,23 @@ Trained to distinguish English from 52+ languages including:
 
 ## Performance
 
-- **Validation accuracy**: 99.94%
-- **Challenge set accuracy**: 100% (14/14 comprehensive test cases)
-- **Model size**: ~600KB
-- **Inference speed**: ONNX CPU ~0.6ms; TinyGrad ~50–60ms (CPU, batch 1)
-- **Memory usage**: Minimal (~10MB RAM)
+- Validation accuracy: 99.94%
+- Challenge set accuracy: 100% (14/14)
+- Model size: ~600 KB
+- Inference speed: ONNX CPU ~0.6 ms; TinyGrad ~50–60 ms (CPU, batch 1)
+- Memory usage: ~10 MB
 
-### Challenge Set Results
+### Challenge Set
 
-Perfect accuracy on diverse test cases:
-- ✅ Ultra-short texts: "Good morning!"
-- ✅ Emoji handling: "Check our sale! 🎉"  
-- ✅ Mathematical formulas: "x = (-b ± √(b²-4ac))/2a"
-- ✅ Scientific notation: "CO₂ + H₂O → C₆H₁₂O₆"
-- ✅ All major scripts: Arabic, CJK, Cyrillic, Devanagari
-- ✅ Tricky cases: Dutch vs English, technical text
+Full marks across diverse cases, including ultra‑short text, emoji, formulas, scientific notation, and major scripts (Arabic, CJK, Cyrillic, Devanagari).
 
 ## Architecture
 
-- **Model type**: Byte-level Convolutional Neural Network
-- **Input**: Raw UTF-8 bytes (up to 256 bytes per chunk)
-- **Output**: Binary classification (English vs Non-English)
-- **Parameters**: 156,642 (~600KB)
-- **Framework**: ONNX Runtime (cross-platform)
+- Model: byte‑level CNN
+- Input: raw UTF‑8 bytes (up to 256 bytes per chunk)
+- Output: binary (English vs Non‑English)
+- Parameters: ~156k (~600 KB)
+- Runtime: ONNX or TinyGrad
 
 ## Text Length Handling
 
@@ -119,11 +109,11 @@ Perfect accuracy on diverse test cases:
 | 256+ bytes | Auto-chunking | Excellent |
 | 2KB+ text | Multiple chunks + voting | Very good |
 
-For texts longer than 256 bytes, innit automatically:
-1. Splits text into overlapping chunks
-2. Processes each chunk independently  
-3. Combines results using weighted averaging and majority voting
-4. Reports aggregated confidence score
+For texts longer than 256 bytes, innit can:
+1. Split into overlapping chunks
+2. Process each chunk independently
+3. Combine results using weighted averaging and majority voting
+4. Report an aggregated confidence score
 
 ## Development
 
@@ -132,21 +122,21 @@ For texts longer than 256 bytes, innit automatically:
 pip install -e ".[dev]"
 
 # Code quality
-ruff check innit_detector.py
-black innit_detector.py
-mypy innit_detector.py
+ruff check .
+black innit innit_*.py
+mypy innit innit_detector.py innit_tinygrad.py innit_tinygrad_fixed.py innit_client.py
 
 # Run tests
-pytest --cov=innit_detector
+pytest
 ```
 
 ## Model Details
 
-The model is available on [🤗 HuggingFace Hub](https://huggingface.co/Mitchins/innit-language-detection) with:
-- PyTorch weights (SafeTensors format)
-- ONNX runtime version  
-- Complete training details
-- Comprehensive documentation
+Models and weights are hosted on Hugging Face: https://huggingface.co/Mitchins/innit-language-detection
+
+- PyTorch weights (SafeTensors)
+- ONNX model
+- Training notes and documentation
 
 ## Contributing
 
