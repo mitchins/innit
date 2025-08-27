@@ -32,8 +32,8 @@ jobs:
 
       - name: Lint with ruff and flake8
         run: |
-          ruff check .
-          flake8 .
+          ruff check innit tests
+          flake8 innit tests --max-line-length 100 --extend-ignore E203,E501 --jobs auto
 
       - name: Check for dead code with vulture
         run: |

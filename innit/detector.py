@@ -244,8 +244,6 @@ class InnitDetector:
         self.tg_model.load_weights(pt_weights)
         # Warm-up to JIT compile kernels
         try:
-            from tinygrad import Tensor
-
             dummy = Tensor(np.zeros((1, self.config.get("max_length", 256)), dtype=np.int32))
             _ = self.tg_model(dummy).numpy()
         except Exception:
