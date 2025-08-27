@@ -80,6 +80,7 @@ line-length = 100
 target-version = "py310"
 exclude = [
     ".git",
+    ".venv",
     "venv",
     "build",
     "dist",
@@ -115,6 +116,7 @@ max-line-length = 100
 extend-ignore = ["E203", "E501"]  # handled by Black and style prefs
 exclude = [
     ".git",
+    ".venv",
     "venv",
     "build",
     "dist",

@@ -49,4 +49,3 @@ if __name__ == "__main__":
     test_tinygrad_basic_predictions()
     test_batch_fast_matches_elementwise()
     print("TinyGrad smoke tests passed")
-

@@ -10,8 +10,8 @@ Backed by InnitDetector in innit_detector.py.
 """
 
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import List, Dict, Optional
 
 from .detector import InnitDetector
 
@@ -19,7 +19,7 @@ from .detector import InnitDetector
 @dataclass
 class InnitClientConfig:
     backend: str = "auto"  # 'auto' | 'onnx' | 'tinygrad'
-    model_path: Optional[str] = None
+    model_path: str | None = None
     # For document classification when strategy='auto'
     ends_pct: float = 0.10
     long_doc_bytes_threshold: int = 1024  # switch to 'ends' if longer than this
@@ -28,18 +28,20 @@ class InnitClientConfig:
 class InnitClient:
     """High-level client API around InnitDetector."""
 
-    def __init__(self, config: Optional[InnitClientConfig] = None):
+    def __init__(self, config: InnitClientConfig | None = None):
         self.config = config or InnitClientConfig()
         backend = self.config.backend
         if backend == "auto":
             # Prefer ONNX if available, else TinyGrad
             try:
                 import onnxruntime  # noqa: F401
+
                 backend = "onnx"
             except Exception:
                 try:
-                    import tinygrad  # noqa: F401
                     import safetensors  # noqa: F401
+                    import tinygrad  # noqa: F401
+
                     backend = "tinygrad"
                 except Exception:
                     raise ImportError(
@@ -48,7 +50,7 @@ class InnitClient:
         self.detector = InnitDetector(model_path=self.config.model_path, backend=backend)
 
     # --- Single snippet ---
-    def classify(self, text: str, *, strategy: str = "auto", ends_pct: Optional[float] = None) -> Dict:
+    def classify(self, text: str, *, strategy: str = "auto", ends_pct: float | None = None) -> dict:
         """Classify a single snippet.
 
         strategy: 'auto'|'truncate'|'chunk'|'ends'
@@ -60,7 +62,9 @@ class InnitClient:
         return self.detector.predict(text, chunk_strategy=strategy, ends_pct=ep)
 
     # --- Whole document ---
-    def classify_document(self, text: str, *, strategy: str = "auto", ends_pct: Optional[float] = None) -> Dict:
+    def classify_document(
+        self, text: str, *, strategy: str = "auto", ends_pct: float | None = None
+    ) -> dict:
         """Classify a full document with hidden heuristics.
 
         - If strategy == 'auto': use 'ends' for long docs, else single-chunk.
@@ -74,10 +78,10 @@ class InnitClient:
         return self.detector.predict(text, chunk_strategy=strategy, ends_pct=ep)
 
     # JS-style alias if desired
-    def classifyDocument(self, text: str, **kwargs) -> Dict:
+    def classifyDocument(self, text: str, **kwargs) -> dict:
         return self.classify_document(text, **kwargs)
 
     # --- Bulk snippets ---
-    def classify_snippets(self, texts: List[str]) -> List[Dict]:
+    def classify_snippets(self, texts: list[str]) -> list[dict]:
         """Vectorized classification for multiple short snippets."""
         return self.detector.predict_batch_fast(texts)

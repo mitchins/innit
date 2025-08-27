@@ -29,7 +29,7 @@ import numpy as np
 
 class TinyByteCNN_TG:
     """Pure tinygrad implementation of TinyByteCNN"""
-    
+
     def __init__(self, config: dict):
         self.config = config
         # Weights will be loaded from SafeTensors
@@ -44,14 +44,14 @@ class TinyByteCNN_TG:
         self.fc1_bias = None
         self.fc2_weight = None
         self.fc2_bias = None
-    
+
     def load_weights(self, pt_weights):
         """Load all weights from PyTorch state dict"""
         from tinygrad import Tensor
-        
+
         # Embedding
         self.emb_weight = Tensor(pt_weights["emb.weight"].numpy())
-        
+
         # Conv blocks (6 blocks)
         for i in range(6):
             self.conv_weights.append(Tensor(pt_weights[f"blocks.{i}.0.weight"].numpy()))
@@ -60,77 +60,80 @@ class TinyByteCNN_TG:
             self.bn_biases.append(Tensor(pt_weights[f"blocks.{i}.2.bias"].numpy()))
             self.bn_means.append(Tensor(pt_weights[f"blocks.{i}.2.running_mean"].numpy()))
             self.bn_vars.append(Tensor(pt_weights[f"blocks.{i}.2.running_var"].numpy()))
-        
+
         # Fully connected layers
         self.fc1_weight = Tensor(pt_weights["fc.0.weight"].numpy())
         self.fc1_bias = Tensor(pt_weights["fc.0.bias"].numpy())
         self.fc2_weight = Tensor(pt_weights["fc.3.weight"].numpy())
         self.fc2_bias = Tensor(pt_weights["fc.3.bias"].numpy())
-    
+
     def conv1d(self, x, weight, bias, padding=1):
         """Conv1D using conv2d"""
         batch_size, in_channels, seq_len = x.shape
         out_channels, _, kernel_size = weight.shape
-        
+
         # Reshape for conv2d
         x_2d = x.reshape(batch_size, in_channels, 1, seq_len)
         weight_2d = weight.reshape(out_channels, in_channels, 1, kernel_size)
-        
+
         # Apply conv2d with padding
         if padding > 0:
             x_2d = x_2d.pad(((0, 0), (0, 0), (0, 0), (padding, padding)))
-        
+
         result = x_2d.conv2d(weight_2d).reshape(batch_size, out_channels, -1)
         return result + bias.reshape(1, -1, 1)
-    
+
     def batchnorm1d(self, x, weight, bias, running_mean, running_var, eps=1e-5):
         """Batch normalization in eval mode"""
         mean = running_mean.reshape(1, -1, 1)
         var = running_var.reshape(1, -1, 1)
         weight = weight.reshape(1, -1, 1)
         bias = bias.reshape(1, -1, 1)
-        
+
         normalized = (x - mean) / (var + eps).sqrt()
         return normalized * weight + bias
-    
+
     def conv_block(self, x, i):
         """Conv1D -> GELU -> BatchNorm -> Residual add"""
         residual = x
         x = self.conv1d(x, self.conv_weights[i], self.conv_biases[i], padding=1)
         x = x.gelu()
-        x = self.batchnorm1d(x, self.bn_weights[i], self.bn_biases[i],
-                              self.bn_means[i], self.bn_vars[i])
+        x = self.batchnorm1d(
+            x, self.bn_weights[i], self.bn_biases[i], self.bn_means[i], self.bn_vars[i]
+        )
         return x + residual
-    
+
     def global_pool(self, x):
         """Global pooling: mean, max, std (matches ONNX)"""
         from tinygrad import Tensor
+
         mean_pool = x.mean(axis=2)
         max_pool = x.max(axis=2)
         std_pool = (x.var(axis=2) + 1e-5).sqrt()
         return Tensor.cat(mean_pool, max_pool, std_pool, dim=1)
-    
+
     def __call__(self, x):
         """Forward pass"""
         # Embedding
         x = self.emb_weight[x]
-        
+
         # Transpose for conv1d
         x = x.transpose(-1, -2)
-        
+
         # Apply 6 conv blocks
         for i in range(6):
             x = self.conv_block(x, i)
-        
+
         # Global pooling
         pooled = self.global_pool(x)
-        
+
         # Classifier
         x = pooled.dot(self.fc1_weight.T) + self.fc1_bias
         x = x.gelu()
         x = x.dot(self.fc2_weight.T) + self.fc2_bias
-        
+
         return x
+
 
 # Model configuration
 MODEL_URL = "https://huggingface.co/Mitchins/innit-language-detection/resolve/main/model.onnx"
@@ -138,8 +141,12 @@ MODEL_PATH = Path.home() / ".innit" / "model.onnx"
 MODEL_SIZE_MB = 0.6  # Approximate size for progress
 
 # Tinygrad asset locations (SafeTensors + config)
-TINY_MODEL_URL = "https://huggingface.co/Mitchins/innit-language-detection/resolve/main/model.safetensors"
-TINY_CONFIG_URL = "https://huggingface.co/Mitchins/innit-language-detection/resolve/main/config.json"
+TINY_MODEL_URL = (
+    "https://huggingface.co/Mitchins/innit-language-detection/resolve/main/model.safetensors"
+)
+TINY_CONFIG_URL = (
+    "https://huggingface.co/Mitchins/innit-language-detection/resolve/main/config.json"
+)
 TINY_MODEL_PATH = Path.home() / ".innit" / "model.safetensors"
 TINY_CONFIG_PATH = Path.home() / ".innit" / "config.json"
 
@@ -157,7 +164,7 @@ class InnitDetector:
         """
         self.backend = backend.lower()
         self.model_path = Path(model_path) if model_path else MODEL_PATH
-        
+
         if self.backend == "onnx":
             self.session = None
             self._load_model()
@@ -177,26 +184,32 @@ class InnitDetector:
         try:
             import onnxruntime as ort
         except ImportError as err:
-            raise ImportError("onnxruntime is required. Install with: pip install onnxruntime") from err
+            raise ImportError(
+                "onnxruntime is required. Install with: pip install onnxruntime"
+            ) from err
 
         self.session = ort.InferenceSession(
             str(self.model_path), providers=["CPUExecutionProvider"]
         )
-    
+
     def _load_tinygrad_model(self):
         """Load tinygrad model."""
         try:
-            from tinygrad import Tensor
             import safetensors.torch
+            from tinygrad import Tensor
         except ImportError as err:
             raise ImportError(
                 "tinygrad and safetensors are required for tinygrad backend. "
                 "Install with: pip install tinygrad safetensors"
             ) from err
-        
+
         # Prefer cached paths in ~/.innit, fall back to repo, else attempt download
-        safetensors_path = TINY_MODEL_PATH if TINY_MODEL_PATH.exists() else Path("innit-model/model.safetensors")
-        config_path = TINY_CONFIG_PATH if TINY_CONFIG_PATH.exists() else Path("innit-model/config.json")
+        safetensors_path = (
+            TINY_MODEL_PATH if TINY_MODEL_PATH.exists() else Path("innit-model/model.safetensors")
+        )
+        config_path = (
+            TINY_CONFIG_PATH if TINY_CONFIG_PATH.exists() else Path("innit-model/config.json")
+        )
 
         # Attempt auto-download into cache if missing
         if not safetensors_path.exists() or not config_path.exists():
@@ -217,20 +230,22 @@ class InnitDetector:
                 f"Config file not found. Expected at {TINY_CONFIG_PATH}."
                 " Run with --download or install assets."
             )
-        
+
         # Load config and create tinygrad model
         with open(config_path) as f:
             import json
+
             self.config = json.load(f)
-        
+
         self.tg_model = TinyByteCNN_TG(self.config)
-        
+
         # Load weights from SafeTensors
         pt_weights = safetensors.torch.load_file(safetensors_path)
         self.tg_model.load_weights(pt_weights)
         # Warm-up to JIT compile kernels
         try:
             from tinygrad import Tensor
+
             dummy = Tensor(np.zeros((1, self.config.get("max_length", 256)), dtype=np.int32))
             _ = self.tg_model(dummy).numpy()
         except Exception:
@@ -260,13 +275,14 @@ class InnitDetector:
             # Run ONNX inference
             outputs = self.session.run(["logits"], {"input_bytes": padded.reshape(1, -1)})
             logits = outputs[0][0]
-        
+
         elif self.backend == "tinygrad":
             if not self.tg_model:
                 raise RuntimeError("Tinygrad model not loaded")
-            
+
             # Run tinygrad inference
             from tinygrad import Tensor
+
             input_tensor = Tensor(padded.reshape(1, -1))
             logits_tensor = self.tg_model(input_tensor)
             logits = logits_tensor.numpy()[0]
@@ -277,7 +293,9 @@ class InnitDetector:
 
         return {"english": float(probs[1]), "non_english": float(probs[0])}
 
-    def predict(self, text: str, chunk_strategy: str = "auto", ends_pct: float = 0.1) -> dict[str, str | float]:
+    def predict(
+        self, text: str, chunk_strategy: str = "auto", ends_pct: float = 0.1
+    ) -> dict[str, str | float]:
         """
         Predict if text is English or not with automatic chunking for long texts.
 
@@ -403,7 +421,9 @@ class InnitDetector:
 
         return chunks if chunks else [text[:100]]  # Fallback
 
-    def _create_ends_chunks(self, text: str, ends_pct: float = 0.1, max_chunk_bytes: int = 256) -> list:
+    def _create_ends_chunks(
+        self, text: str, ends_pct: float = 0.1, max_chunk_bytes: int = 256
+    ) -> list:
         """Create two chunks: the first and last percentage of the document.
 
         ends_pct is fraction of the document length (in bytes approx), each end capped at max_chunk_bytes.
@@ -452,6 +472,7 @@ class InnitDetector:
             logits = outputs[0]
         elif self.backend == "tinygrad":
             from tinygrad import Tensor
+
             logits = self.tg_model(Tensor(batch)).numpy()
         else:
             raise ValueError("Unsupported backend")
@@ -467,7 +488,10 @@ class InnitDetector:
                     "language": "en" if is_en else "other",
                     "is_english": bool(is_en),
                     "confidence": confidence,
-                    "probabilities": {"english": float(probs[i, 1]), "non_english": float(probs[i, 0])},
+                    "probabilities": {
+                        "english": float(probs[i, 1]),
+                        "non_english": float(probs[i, 0]),
+                    },
                     "chunks_processed": 1,
                     "method": "batch",
                 }
@@ -486,8 +510,10 @@ def download_model(force: bool = False, backend: str = "both") -> bool:
     Returns:
         True if download successful
     """
+
     def _download(url: str, dest: Path, size_hint_mb: float | None = None) -> bool:
         dest.parent.mkdir(parents=True, exist_ok=True)
+
         class ProgressBar:
             def __init__(self, total_size):
                 self.total_size = total_size
@@ -501,10 +527,12 @@ def download_model(force: bool = False, backend: str = "both") -> bool:
                     filled_length = int(bar_length * percent // 100)
                     bar = "█" * filled_length + "-" * (bar_length - filled_length)
                     print(
-                        f"\r[{bar}] {percent:.1f}% ({self.downloaded}/{self.total_size} bytes)", end=""
+                        f"\r[{bar}] {percent:.1f}% ({self.downloaded}/{self.total_size} bytes)",
+                        end="",
                     )
                 else:
                     print(f"\rDownloaded: {self.downloaded} bytes", end="")
+
         try:
             print(f"Downloading: {url}\nTo: {dest}")
             with urllib.request.urlopen(url) as response:
@@ -625,6 +653,7 @@ Examples:
     if backend == "auto":
         try:
             import onnxruntime  # noqa: F401
+
             backend = "onnx"
         except Exception:
             backend = "tinygrad"
@@ -639,14 +668,18 @@ Examples:
     except ImportError as e:
         print(f"❌ {e}")
         if args.backend == "auto":
-            print("💡 Install a backend: 'pip install innit-detector[onnx]' for ONNX, or TinyGrad is already bundled.")
+            print(
+                "💡 Install a backend: 'pip install innit-detector[onnx]' for ONNX, or TinyGrad is already bundled."
+            )
         sys.exit(1)
 
     # Process texts
     results = []
     for text in texts:
         try:
-            result = detector.predict(text, chunk_strategy=args.chunk_strategy, ends_pct=args.ends_pct)
+            result = detector.predict(
+                text, chunk_strategy=args.chunk_strategy, ends_pct=args.ends_pct
+            )
             results.append({"text": text, **result})
         except Exception as e:
             print(f"❌ Error processing '{text}': {e}")

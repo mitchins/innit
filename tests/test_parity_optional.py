@@ -4,11 +4,7 @@
 Skips gracefully if onnxruntime or ONNX model is not available.
 """
 
-import os
-import math
 from pathlib import Path
-
-import numpy as np
 
 from innit import InnitClient, InnitClientConfig
 
@@ -44,4 +40,3 @@ def test_onnx_tinygrad_parity_small_suite():
 if __name__ == "__main__":
     test_onnx_tinygrad_parity_small_suite()
     print("Parity test completed (skipped if ONNX unavailable)")
-

@@ -123,8 +123,8 @@ pip install -e ".[dev]"
 
 # Code quality
 ruff check .
-black innit innit_*.py
-mypy innit innit_detector.py innit_tinygrad.py innit_tinygrad_fixed.py innit_client.py
+black innit tests
+mypy innit
 
 # Run tests
 pytest

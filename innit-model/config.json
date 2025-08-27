@@ -1,0 +1,14 @@
+{
+  "architectures": [
+    "TinyByteCNN_EN"
+  ],
+  "model_type": "byte_cnn",
+  "emb_dim": 80,
+  "num_blocks": 6,
+  "dropout": 0.15,
+  "vocab_size": 257,
+  "num_classes": 2,
+  "max_length": 256,
+  "validation_accuracy": 99.94301994301995,
+  "torch_dtype": "float32"
+}

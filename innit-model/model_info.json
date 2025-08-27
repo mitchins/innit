@@ -1,0 +1,21 @@
+{
+  "model_name": "innit",
+  "version": "1.0",
+  "task": "english_detection",
+  "architecture": "TinyByteCNN_EN",
+  "parameters": 156642,
+  "input_format": "utf8_bytes",
+  "max_length": 256,
+  "output_classes": [
+    "NOT-EN",
+    "EN"
+  ],
+  "validation_accuracy": 99.94,
+  "challenge_accuracy": 100.0,
+  "files": {
+    "pytorch": "model.safetensors",
+    "config": "config.json",
+    "onnx": "model.onnx",
+    "readme": "README.md"
+  }
+}

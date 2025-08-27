@@ -14,22 +14,22 @@ clean:  ## Clean build artifacts
 	rm -rf build/ dist/ *.egg-info __pycache__/ .pytest_cache/ .coverage .mypy_cache/
 
 lint:  ## Run linting (ruff, flake8, vulture)
-	ruff check .
-	flake8 .
+	ruff check innit tests
+	flake8 innit tests --jobs auto
 	# Vulture: check only our code, ignore tests to reduce noise
-	vulture innit innit_*.py --min-confidence 80 || true
+	vulture innit --min-confidence 90 || true
 
 lint-fix:  ## Fix linting issues
 	ruff check --fix .
 
 format:  ## Format code (black)
-	black innit innit_*.py
+	black innit tests
 
 format-check:  ## Check code formatting
-	black --check innit innit_*.py
+	black --check innit tests
 
 type-check:  ## Run type checking (mypy)
-	mypy innit innit_detector.py innit_tinygrad.py innit_tinygrad_fixed.py innit_client.py
+	mypy innit
 
 test:  ## Run tests with coverage
 	pytest
