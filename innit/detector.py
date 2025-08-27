@@ -57,12 +57,12 @@ class TinyByteCNN_TG:
 
         # Conv blocks (6 blocks)
         for i in range(6):
-            self.conv_weights.append(Tensor(as_np(pt_weights[f"blocks.{i}.0.weight"])) )
-            self.conv_biases.append(Tensor(as_np(pt_weights[f"blocks.{i}.0.bias"])) )
-            self.bn_weights.append(Tensor(as_np(pt_weights[f"blocks.{i}.2.weight"])) )
-            self.bn_biases.append(Tensor(as_np(pt_weights[f"blocks.{i}.2.bias"])) )
-            self.bn_means.append(Tensor(as_np(pt_weights[f"blocks.{i}.2.running_mean"])) )
-            self.bn_vars.append(Tensor(as_np(pt_weights[f"blocks.{i}.2.running_var"])) )
+            self.conv_weights.append(Tensor(as_np(pt_weights[f"blocks.{i}.0.weight"])))
+            self.conv_biases.append(Tensor(as_np(pt_weights[f"blocks.{i}.0.bias"])))
+            self.bn_weights.append(Tensor(as_np(pt_weights[f"blocks.{i}.2.weight"])))
+            self.bn_biases.append(Tensor(as_np(pt_weights[f"blocks.{i}.2.bias"])))
+            self.bn_means.append(Tensor(as_np(pt_weights[f"blocks.{i}.2.running_mean"])))
+            self.bn_vars.append(Tensor(as_np(pt_weights[f"blocks.{i}.2.running_var"])))
 
         # Fully connected layers
         self.fc1_weight = Tensor(as_np(pt_weights["fc.0.weight"]))
