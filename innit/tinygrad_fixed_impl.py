@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 
 import numpy as np
-import safetensors.torch
+from .assets import load_safetensors_numpy
 from tinygrad import Tensor
 
 # Model configuration (prefer cache in ~/.innit)
@@ -175,8 +175,8 @@ class InnitTinygradFixed:
         """Load weights from SafeTensors file"""
         print("Loading weights from SafeTensors...")
 
-        # Load PyTorch weights
-        pt_weights = safetensors.torch.load_file(self.model_path)
+        # Load weights as NumPy arrays (no torch dependency)
+        pt_weights = load_safetensors_numpy(self.model_path)
         self.model.load_weights(pt_weights)
 
         print("✅ Weights loaded successfully!")

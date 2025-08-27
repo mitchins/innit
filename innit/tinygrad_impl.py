@@ -11,7 +11,7 @@ import time
 from pathlib import Path
 
 import numpy as np
-import safetensors.torch
+from .assets import load_safetensors_numpy
 from tinygrad import Tensor, nn
 
 # Model configuration (prefer cache in ~/.innit, fallback to repo paths)
@@ -111,15 +111,15 @@ class InnitTinygrad:
         """Load weights from SafeTensors file"""
         print("Loading weights from SafeTensors...")
 
-        # Load PyTorch weights
-        pt_weights = safetensors.torch.load_file(self.model_path)
+        # Load weights as NumPy arrays (no torch dependency)
+        pt_weights = load_safetensors_numpy(self.model_path)
 
         # Convert to tinygrad tensors
         state_dict = {}
-        for name, tensor in pt_weights.items():
+        for name, arr in pt_weights.items():
             if "num_batches_tracked" in name:
                 continue  # Skip batch norm tracking statistics
-            state_dict[name] = Tensor(tensor.numpy())
+            state_dict[name] = Tensor(arr)
 
         # Map weights to tinygrad model
         self._load_embedding_weights(state_dict)

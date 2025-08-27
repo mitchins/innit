@@ -46,26 +46,29 @@ class TinyByteCNN_TG:
         self.fc2_bias = None
 
     def load_weights(self, pt_weights):
-        """Load all weights from PyTorch state dict"""
+        """Load weights dict (NumPy arrays or torch tensors)."""
         from tinygrad import Tensor
 
+        def as_np(x):
+            return x.numpy() if hasattr(x, "numpy") else x
+
         # Embedding
-        self.emb_weight = Tensor(pt_weights["emb.weight"].numpy())
+        self.emb_weight = Tensor(as_np(pt_weights["emb.weight"]))
 
         # Conv blocks (6 blocks)
         for i in range(6):
-            self.conv_weights.append(Tensor(pt_weights[f"blocks.{i}.0.weight"].numpy()))
-            self.conv_biases.append(Tensor(pt_weights[f"blocks.{i}.0.bias"].numpy()))
-            self.bn_weights.append(Tensor(pt_weights[f"blocks.{i}.2.weight"].numpy()))
-            self.bn_biases.append(Tensor(pt_weights[f"blocks.{i}.2.bias"].numpy()))
-            self.bn_means.append(Tensor(pt_weights[f"blocks.{i}.2.running_mean"].numpy()))
-            self.bn_vars.append(Tensor(pt_weights[f"blocks.{i}.2.running_var"].numpy()))
+            self.conv_weights.append(Tensor(as_np(pt_weights[f"blocks.{i}.0.weight"])) )
+            self.conv_biases.append(Tensor(as_np(pt_weights[f"blocks.{i}.0.bias"])) )
+            self.bn_weights.append(Tensor(as_np(pt_weights[f"blocks.{i}.2.weight"])) )
+            self.bn_biases.append(Tensor(as_np(pt_weights[f"blocks.{i}.2.bias"])) )
+            self.bn_means.append(Tensor(as_np(pt_weights[f"blocks.{i}.2.running_mean"])) )
+            self.bn_vars.append(Tensor(as_np(pt_weights[f"blocks.{i}.2.running_var"])) )
 
         # Fully connected layers
-        self.fc1_weight = Tensor(pt_weights["fc.0.weight"].numpy())
-        self.fc1_bias = Tensor(pt_weights["fc.0.bias"].numpy())
-        self.fc2_weight = Tensor(pt_weights["fc.3.weight"].numpy())
-        self.fc2_bias = Tensor(pt_weights["fc.3.bias"].numpy())
+        self.fc1_weight = Tensor(as_np(pt_weights["fc.0.weight"]))
+        self.fc1_bias = Tensor(as_np(pt_weights["fc.0.bias"]))
+        self.fc2_weight = Tensor(as_np(pt_weights["fc.3.weight"]))
+        self.fc2_bias = Tensor(as_np(pt_weights["fc.3.bias"]))
 
     def conv1d(self, x, weight, bias, padding=1):
         """Conv1D using conv2d"""
@@ -195,8 +198,8 @@ class InnitDetector:
     def _load_tinygrad_model(self):
         """Load tinygrad model."""
         try:
-            import safetensors.torch
             from tinygrad import Tensor
+            from .assets import load_safetensors_numpy
         except ImportError as err:
             raise ImportError(
                 "tinygrad and safetensors are required for tinygrad backend. "
@@ -239,8 +242,8 @@ class InnitDetector:
 
         self.tg_model = TinyByteCNN_TG(self.config)
 
-        # Load weights from SafeTensors
-        pt_weights = safetensors.torch.load_file(safetensors_path)
+        # Load weights from SafeTensors (NumPy)
+        pt_weights = load_safetensors_numpy(safetensors_path)
         self.tg_model.load_weights(pt_weights)
         # Warm-up to JIT compile kernels
         try:
