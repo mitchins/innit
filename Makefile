@@ -13,23 +13,26 @@ install-dev:  ## Install with development dependencies
 clean:  ## Clean build artifacts
 	rm -rf build/ dist/ *.egg-info __pycache__/ .pytest_cache/ .coverage .mypy_cache/
 
-lint:  ## Run linting (ruff)
-	ruff check innit_detector.py
+lint:  ## Run linting (ruff, flake8, vulture)
+	ruff check .
+	flake8 .
+	# Vulture: check only our code, ignore tests to reduce noise
+	vulture innit innit_*.py --min-confidence 80 || true
 
 lint-fix:  ## Fix linting issues
-	ruff check --fix innit_detector.py
+	ruff check --fix .
 
 format:  ## Format code (black)
-	black innit_detector.py
+	black innit innit_*.py
 
 format-check:  ## Check code formatting
-	black --check innit_detector.py
+	black --check innit innit_*.py
 
 type-check:  ## Run type checking (mypy)
-	mypy innit_detector.py
+	mypy innit innit_detector.py innit_tinygrad.py innit_tinygrad_fixed.py innit_client.py
 
 test:  ## Run tests with coverage
-	pytest --cov=innit_detector
+	pytest
 
 quality:  ## Run all quality checks
 	$(MAKE) format-check lint type-check

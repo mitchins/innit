@@ -15,3 +15,11 @@ venv/
 
 # OS files
 .DS_Store
+.cache/
+
+# Model artifacts (keep hosted, don't commit large binaries)
+innit-model/*.safetensors
+innit-model/*.onnx
+innit-model/*.bin
+innit-model/*.pt
+innit-model/*.pth

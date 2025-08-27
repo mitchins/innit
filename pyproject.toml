@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "innit-detector"
-version = "1.0.0"
-description = "Fast English vs Non-English text detection using ONNX"
+version = "1.1.0"
+description = "Fast English vs Non-English text detection (ONNX or Tinygrad backends)"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
@@ -38,11 +38,15 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "onnxruntime>=1.15.0",
     "numpy>=1.21.0",
+    "tinygrad>=0.12.0",
+    "safetensors>=0.4.3",
 ]
 
 [project.optional-dependencies]
+onnx = [
+    "onnxruntime>=1.15.0",
+]
 dev = [
     "black>=23.0.0",
     "flake8>=6.0.0",
@@ -51,6 +55,7 @@ dev = [
     "mypy>=1.5.0",
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
+    "pytest-env>=1.1.3",
     "ruff>=0.1.0",
 ]
 
@@ -61,10 +66,10 @@ dev = [
 "Repository" = "https://github.com/Mitchins/innit-language-detection"
 
 [project.scripts]
-innit = "innit_detector:main"
+innit = "innit.detector:main"
 
 [tool.setuptools]
-py-modules = ["innit_detector"]
+packages = ["innit"]
 
 [tool.black]
 line-length = 100
@@ -73,6 +78,16 @@ target-version = ['py310']
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+exclude = [
+    ".git",
+    "venv",
+    "build",
+    "dist",
+    "*.egg-info",
+    "__pycache__",
+    ".pytest_cache",
+    ".ruff_cache",
+]
 
 [tool.ruff.lint]
 select = [
@@ -95,13 +110,29 @@ warn_unused_configs = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
 
+[tool.flake8]
+max-line-length = 100
+extend-ignore = ["E203", "E501"]  # handled by Black and style prefs
+exclude = [
+    ".git",
+    "venv",
+    "build",
+    "dist",
+    "*.egg-info",
+    "__pycache__",
+    ".pytest_cache",
+]
+
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "-ra -q --cov=innit_detector"
+addopts = "-ra -q --cov=innit"
 testpaths = ["tests"]
+env = [
+  "PYTHONPATH=.",
+]
 
 [tool.coverage.run]
-source = ["innit_detector"]
+source = ["innit"]
 
 [tool.coverage.report]
 exclude_lines = [
