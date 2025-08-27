@@ -48,7 +48,7 @@ class TinyByteCNN_TG:
 
         # 6 convolutional blocks (all 80->80 channels, kernel=3)
         self.blocks = []
-        for i in range(config["num_blocks"]):
+        for _i in range(config["num_blocks"]):
             block = ConvBlock(config["emb_dim"], config["emb_dim"], kernel_size=3)
             self.blocks.append(block)
 
@@ -228,8 +228,8 @@ class InnitTinygrad:
         start_time = time.time()
         max_len = 256
         batch = np.zeros((len(texts), max_len), dtype=np.int32)
-        for i, t in enumerate(texts):
-            b = t.encode("utf-8", errors="ignore")[:max_len]
+        for i, _t in enumerate(texts):
+            b = _t.encode("utf-8", errors="ignore")[:max_len]
             batch[i, : len(b)] = list(b)
         logits = self.model(Tensor(batch)).numpy()
         # Softmax per row
@@ -237,7 +237,7 @@ class InnitTinygrad:
         exp = np.exp(logits)
         probs = exp / exp.sum(axis=1, keepdims=True)
         results = []
-        for i, t in enumerate(texts):
+        for i, _t in enumerate(texts):
             is_en = probs[i, 1] > 0.5
             conf = float(max(probs[i, 0], probs[i, 1]))
             results.append(

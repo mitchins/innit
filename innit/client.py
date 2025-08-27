@@ -43,10 +43,10 @@ class InnitClient:
                     import tinygrad  # noqa: F401
 
                     backend = "tinygrad"
-                except Exception:
+                except Exception as err:
                     raise ImportError(
                         "No backend found. Install one: pip install 'innit-detector[onnx]' or 'innit-detector[tinygrad]'"
-                    )
+                    ) from err
         self.detector = InnitDetector(model_path=self.config.model_path, backend=backend)
 
     # --- Single snippet ---
